@@ -1,30 +1,44 @@
-import { useEffect,useState } from "react"
+import { useEffect, useState } from "react";
 
+function Popup() {
+  const [domain, setDomain] = useState("");
+  const [loginDetected, setLoginDetected] = useState(false);
 
- 
- 
- function Popup () {
+  useEffect(() => {
+    if (!chrome?.tabs?.query) return;
 
-  const{domain , setDomain } = useState("")
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (!tabs || !tabs[0]?.url) return;
 
-  useEffect(()=>{
-    chrome.tabs.query({active:true,currentWindow:true},(tabs)=>{
-        const url = new URL(tabs[0].url)
-      setDomain(url.hostname)           
-    })
-  },[])
+      const url = new URL(tabs[0].url);
+      setDomain(url.hostname);
+    });
+  }, []);
 
+  // message listener
+useEffect(() => {
+  if (!chrome?.storage?.local) return;
 
+  chrome.storage.local.get(["loginDetection "], (res) => {
+    if (res.loginDetected) {
+      setLoginDetected(true);
+    }
+  });
+}, []);
 
-  
-    return (
-        <>
-        <div>
-            <h1>STG AI</h1>
-            <p>Analyzing trust</p>
-            <strong>{domain}</strong>
-        </div>
-        </>
-    )
+  return (
+    <div style={{ padding: 16, width: 280 }}>
+      <h2>STG AI</h2>
+
+      {loginDetected ? (
+        <p style={{ color: "red" }}>Login detected ⚠️</p>
+      ) : (
+        <p>Analyzing trust…</p>
+      )}
+
+      <strong>{domain}</strong>
+    </div>
+  );
 }
-export default Popup
+
+export default Popup;
