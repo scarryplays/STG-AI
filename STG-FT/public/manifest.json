@@ -5,5 +5,17 @@
   "action": {
     "default_popup": "index.html"
   },
-  "permissions": ["activeTab", "scripting"]
+  "permissions": ["activeTab", "scripting"],
+
+
+
+  "content_scripts": [
+  {
+    "matches": ["<all_urls>"],
+    "js": [
+    "Detection/Login-d.js",
+  "Content.js"]
+  }
+]
 }
+

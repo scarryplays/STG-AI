@@ -16,11 +16,11 @@ import { useEffect,useState } from "react"
 
 
 
- 
+  
     return (
         <>
         <div>
-            <h1> hello okay STG AI</h1>
+            <h1>STG AI</h1>
             <p>Analyzing trust</p>
             <strong>{domain}</strong>
         </div>
