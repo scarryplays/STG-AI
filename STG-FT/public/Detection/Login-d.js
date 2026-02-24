@@ -1,4 +1,5 @@
 const loginDetection = () => {
+    console.log("Login detection file loaded");
   const passwordInputs =
     document.querySelector('input[type="password"]') ||
     document.querySelector('input[name="password"]') ||
@@ -23,8 +24,12 @@ const loginDetection = () => {
 
   console.log("Login detected:", loginDetected);
 
-  chrome.storage.local.set({ loginDetected });
-
+  chrome.storage.local.set({ loginDetected }) , ()=>{
+    console.log("Login detection result saved to storage:", loginDetected);
+  };
+   if (loginDetected) {
+  chrome.storage.local.set({ loginDetected: true });
+}
   return loginDetected;
 };
 
