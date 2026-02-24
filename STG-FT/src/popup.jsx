@@ -4,6 +4,7 @@ function Popup() {
   const [domain, setDomain] = useState("");
   const [loginDetected, setLoginDetected] = useState(false);
 
+
   useEffect(() => {
     if (!chrome?.tabs?.query) return;
 
@@ -15,23 +16,29 @@ function Popup() {
     });
   }, []);
 
-  // message listener
-useEffect(() => {
-  if (!chrome?.storage?.local) return;
 
-  chrome.storage.local.get(["loginDetection "], (res) => {
-    if (res.loginDetected) {
-      setLoginDetected(true);
-    }
-  });
-}, []);
+  useEffect(() => {
+    if (!chrome?.storage?.local) return;
+
+    chrome.storage.local.get(["loginDetected"], (res) => {
+      console.log("Popup storage:", res);
+
+      if (res.loginDetected) {
+        setLoginDetected(true);
+      } else {
+        setLoginDetected(false);
+      }
+    });
+  }, []);
 
   return (
     <div style={{ padding: 16, width: 280 }}>
       <h2>STG AI</h2>
 
       {loginDetected ? (
-        <p style={{ color: "red" }}>Login detected ⚠️</p>
+        <p style={{ color: "red", fontWeight: "bold" }}>
+          Login form detected ⚠️
+        </p>
       ) : (
         <p>Analyzing trust…</p>
       )}
