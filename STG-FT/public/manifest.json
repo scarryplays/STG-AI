@@ -15,6 +15,7 @@
     "js": [
     "Detection/Login-d.js",
     "Detection/Tracker-d.js",
+    "Detection/Trackscore-d.js",
   "Content.js"]
   }
 ]
