@@ -47,7 +47,7 @@ function Popup() {
           Login form detected ⚠️
         </p>
       )}
-
+{/* jbkjbvkjbvjsvb  */}
       <p>Trust: {renderTrust()}</p>
 
       <strong>{domain}</strong>
