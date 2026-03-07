@@ -8,6 +8,31 @@ window.addEventListener("load", () => {
   loginDetected,
   trackerCount,
 });
+const showSTGBanner = (score, reason) => {
+  const banner = document.createElement("div");
+  banner.style.position = "fixed";
+  banner.style.top = "0";
+  banner.style.left = "0";  
+  banner.style.width = "100%";
+  banner.style.padding = "10px";
+  banner.style.zIndex = "9999";
+  banner.style.textAlign = "center";
+  banner.style.fontSize = "16px";
+  banner.style.fontWeight = "bold";
+  banner.style.color = "#fff";
+  banner.style.backgroundColor = score === "SAFE" ? "green" : score === "CAUTION" ? "orange" : "red";
+  banner.innerText = `STG AI WARNING: ${score} - ${reason}`;
+  document.body.appendChild(banner);
+}
+
+
+
+
+
+
+
+
+
 fetch("http://127.0.0.1:8000/api/trust/calculate/", {
   method: "POST",
   headers: {
@@ -31,6 +56,9 @@ fetch("http://127.0.0.1:8000/api/trust/calculate/", {
       trustScore: data.trustScore,
       reason: data.reason,
     });
+    if(data.trustScore === "SAFE"||data.trustScore === "CAUTION"||data.trustScore === "RISK"){
+    showSTGBanner(data.trustScore, data.reason);
+  }
   })
   .catch((err) => {
     console.error("Fetch error:", err);

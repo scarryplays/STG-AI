@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from .models import DomainTrust
 
 
 @api_view(["POST"])
@@ -23,8 +24,23 @@ def calculate_trust(request):
         score = "SAFE"
         reason = "Login but no trackers"
 
-    return Response({
-        "domain": domain,
-        "trustScore": score,
-        "reason": reason
-    })
+    DomainTrust.objects.update_or_create(
+        domain=domain,
+        defaults={
+            "trust_score":score,
+            "reason":reason
+        }
+    )
+    existing = DomainTrust.objects.filter(domain=domain).first()
+    if existing:
+        return Response({
+            "domain": existing.domain,
+            "trustScore": existing.trust_score,
+            "reason": existing.reason   
+        })
+
+    # return Response({
+    #     "domain": domain,
+    #     "trustScore": score,
+    #     "reason": reason
+    # })
