@@ -49,7 +49,7 @@ function Popup() {
       )}
 
       <p>Trust: {renderTrust()}</p>
-
+{/* for git? */}
       <strong>{domain}</strong>
     </div>
   );
