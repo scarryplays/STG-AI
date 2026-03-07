@@ -5,9 +5,9 @@ const trustScore = () => {
 
     let score = "NEUTRAL";
 
-    if (login && trackers > 3) score = "RISK";
-    else if (login && trackers > 0) score = "CAUTION";
-    else if (login && trackers === 0) score = "SAFE";
+    if (login && trackers > 5) score = "RISK";
+    else if (login && trackers > 2) score = "CAUTION";
+    else if (login && trackers === 2) score = "SAFE";
 
     console.log("STG trust score:", score);
 

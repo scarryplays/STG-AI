@@ -14,13 +14,13 @@ def calculate_trust(request):
     score = "NEUTRAL"
     reason = "No major signals"
 
-    if login and trackers > 3:
+    if login and trackers > 5:
         score = "RISK"
         reason = "Login form with many trackers"
-    elif login and trackers > 0:
+    elif login and trackers > 2:
         score = "CAUTION"
         reason = "Login form detected"
-    elif login and trackers == 0:
+    elif login and trackers == 2:
         score = "SAFE"
         reason = "Login but no trackers"
 
