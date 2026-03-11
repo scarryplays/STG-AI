@@ -22,7 +22,7 @@ function Popup() {
       setLoginDetected(!!res.loginDetected);
     });
   }, []);
-// for git?
+
   useEffect(() => {
     if (typeof chrome === "undefined" || !chrome.storage) return;
 
