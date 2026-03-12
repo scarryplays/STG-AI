@@ -6,12 +6,19 @@ const loginDetection = () => {
     document.querySelector('input[name="pass"]') ||
     document.querySelector('input[name="pwd"]') ||
     document.querySelector('input[name="txtPassword"]');
+    const usernameOrEmailInputs =
+    document.querySelector('input[name="username_or_email:"]')||
+    document.querySelector('input[name="usernameOrEmail"]') ||
+    document.querySelector('input[name="user_email"]');
 
   const emailInputs =
     document.querySelector('input[type="email"]') ||
     document.querySelector('input[name="email"]') ||
     document.querySelector('input[name="user_email"]') ||
     document.querySelector('input[name="txtEmail"]');
+    const domain = window.location.hostname;
+      console.log("domain check", domain);
+      
 
   const usernameInputs =
     document.querySelector('input[name="username"]') ||
@@ -19,8 +26,9 @@ const loginDetection = () => {
     document.querySelector('input[name="login"]') ||
     document.querySelector('input[name="txtUserId"]') ||
     document.querySelector('input[name="id"]');
+    
 
-  const loginDetected = !!(passwordInputs && (emailInputs || usernameInputs));
+  const loginDetected = !!(passwordInputs && (emailInputs || usernameInputs||usernameOrEmailInputs));
 
   console.log("Login detected:", loginDetected);
 
