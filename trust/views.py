@@ -23,6 +23,7 @@ def calculate_trust(request):
     data = request.data
 
     domain = data.get("domain")
+    domain = domain.replace("www.", "")
     login = data.get("loginDetected")
     trackers = data.get("trackerCount", 0)
 
