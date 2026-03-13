@@ -7,14 +7,22 @@ from .trusted_domain import KNOWN_SITE
 
 
 def get_domain_age(domain):
-    info = whois.whois(domain)
-    creation_date = info.creation_date
+    try:
+        info = whois.whois(domain)
+        creation_date = info.creation_date
 
-    if isinstance(creation_date, list):
-        creation_date = creation_date[0]
+        if isinstance(creation_date, list):
+            creation_date = creation_date[0]
 
-    age_days = (datetime.now() - creation_date).days
-    return age_days
+        if creation_date is None:
+            return 365
+
+        age_days = (datetime.now() - creation_date).days
+        return age_days
+
+    except Exception as e:
+        print(f"Error fetching WHOIS for {domain}: {e}")
+        return 365
 
 
 @api_view(["POST"])
@@ -24,6 +32,7 @@ def calculate_trust(request):
 
     domain = data.get("domain")
     domain = domain.replace("www.", "")
+
     login = data.get("loginDetected")
     trackers = data.get("trackerCount", 0)
 
