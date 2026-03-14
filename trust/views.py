@@ -4,6 +4,7 @@ from .models import DomainTrust
 import whois
 from datetime import datetime
 from .trusted_domain import KNOWN_SITE
+from ml.predictor import predict_url
 
 
 def get_domain_age(domain):
@@ -23,7 +24,7 @@ def get_domain_age(domain):
     except Exception as e:
         print(f"Error fetching WHOIS for {domain}: {e}")
         return 365
-# for com
+
 
 @api_view(["POST"])
 def calculate_trust(request):
@@ -33,8 +34,10 @@ def calculate_trust(request):
     domain = data.get("domain")
     domain = domain.replace("www.", "")
 
-    login = data.get("loginDetected")
-    trackers = data.get("trackerCount", 0)
+    login = data.get("loginDetected") in [True, "true", "True", "1"]
+    trackers = int(data.get("trackerCount", 0))
+
+    ml_result = predict_url(domain)
 
     existing = DomainTrust.objects.filter(domain=domain).first()
 
@@ -55,7 +58,11 @@ def calculate_trust(request):
     else:
         age_days = get_domain_age(domain)
 
-        if age_days < 180:
+        if ml_result == -1:
+            score = "RISK"
+            reason = "ML model detected phishing pattern"
+
+        elif age_days < 180:
             score = "RISK"
             reason = "New domain"
 

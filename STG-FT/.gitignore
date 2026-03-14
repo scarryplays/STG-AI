@@ -38,4 +38,6 @@ dist-ssr
 .env.*.local    
 #node-modules
 node_modules/   
+dist/
+build/
 # SFJBAV
