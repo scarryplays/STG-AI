@@ -25,7 +25,7 @@ def get_domain_age(domain):
         print(f"Error fetching WHOIS for {domain}: {e}")
         return 365
 
-# lkhfakjbcvkj
+
 @api_view(["POST"])
 def calculate_trust(request):
 
