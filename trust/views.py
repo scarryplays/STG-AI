@@ -42,6 +42,8 @@ def calculate_trust(request):
         score = "SAFE"
         suggestion = "Safe to use main account"
         reasons.append("Known trusted domain")
+        ml_confidence = 100
+        reasons.append(f"AI model confidence: {ml_confidence}%")
 
     else:
         ml_result, ml_confidence = predict_url(domain)
@@ -90,7 +92,7 @@ def calculate_trust(request):
     return Response({
         "domain": domain,
         "trustScore": score,
-        "AI suggestion": suggestion,
+        "suggestion": suggestion,
         "reasons": reasons,
-        "Accuracy": ml_confidence
+        "ml_confidence": ml_confidence
     })
