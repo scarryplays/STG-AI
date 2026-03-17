@@ -18,11 +18,9 @@ def get_domain_age(domain):
         if creation_date is None:
             return 365
 
-        age_days = (datetime.now() - creation_date).days
-        return age_days
+        return (datetime.now() - creation_date).days
 
-    except Exception as e:
-        print(f"Error fetching WHOIS for {domain}: {e}")
+    except:
         return 365
 
 
@@ -35,59 +33,63 @@ def calculate_trust(request):
     domain = domain.replace("www.", "")
 
     login = data.get("loginDetected") in [True, "true", "True", "1"]
-    trackers = int(data.get("trackerCount", 0))
+    trackers = int(data.get("trackerCount") or 0)
 
-    ml_result = predict_url(domain)
-
-    existing = DomainTrust.objects.filter(domain=domain).first()
-
-    if existing:
-        return Response({
-            "domain": existing.domain,
-            "trustScore": existing.trust_score,
-            "reason": existing.reason
-        })
-
-    score = "NEUTRAL"
-    reason = "No major signals"
+    reasons = []
+    risk_score = 0
 
     if domain in KNOWN_SITE:
         score = "SAFE"
-        reason = "Known trusted domain"
+        suggestion = "Safe to use main account"
+        reasons.append("Known trusted domain")
 
     else:
-        age_days = get_domain_age(domain)
+        ml_result, ml_confidence = predict_url(domain)
 
         if ml_result == -1:
-            score = "RISK"
-            reason = "ML model detected phishing pattern"
+            risk_score += 50
+            reasons.append("AI model detected phishing pattern")
+            reasons.append(f"Model confidence: {ml_confidence}%")
+        else:
+            reasons.append(f"AI model confidence: {ml_confidence}%")
+        age_days = get_domain_age(domain)
 
-        elif age_days < 180:
-            score = "RISK"
-            reason = "New domain"
+        if age_days < 180:
+            risk_score += 20
+            reasons.append("New domain")
 
-        elif login and trackers > 5:
-            score = "RISK"
-            reason = "Login form with many trackers"
+        if login:
+            risk_score += 10
+            reasons.append("Login form detected")
 
-        elif login and trackers > 2:
+        if trackers > 5:
+            risk_score += 20
+            reasons.append(f"{trackers} trackers detected")
+        elif trackers > 2:
+            risk_score += 10
+            reasons.append(f"{trackers} trackers detected")
+
+        if risk_score >= 60:
+            score = "RISK"
+            suggestion = "Use a dummy account"
+        elif risk_score >= 30:
             score = "CAUTION"
-            reason = "Login form detected"
-
-        elif login and trackers == 0:
+            suggestion = "Use a secondary account"
+        else:
             score = "SAFE"
-            reason = "Login but no trackers"
+            suggestion = "Safe to use main account"
 
     DomainTrust.objects.update_or_create(
         domain=domain,
         defaults={
             "trust_score": score,
-            "reason": reason
+            "reason": ", ".join(reasons)
         }
     )
 
     return Response({
         "domain": domain,
         "trustScore": score,
-        "reason": reason
+        "AI suggestion": suggestion,
+        "reasons": reasons
     })
