@@ -91,5 +91,6 @@ def calculate_trust(request):
         "domain": domain,
         "trustScore": score,
         "AI suggestion": suggestion,
-        "reasons": reasons
+        "reasons": reasons,
+        "Accuracy": ml_confidence
     })
