@@ -19,7 +19,7 @@ const detectPhishingForm = () => {
 };
 
 const showSTGBanner = (score, suggestion) => {
-
+// asadadad
   const banner = document.createElement("div");
 
   banner.style.position = "fixed";
