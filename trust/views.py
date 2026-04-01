@@ -22,6 +22,12 @@ def get_domain_age(domain):
 
     except:
         return 365
+  
+
+
+
+
+
 
 # for i in range(10):
 #      print(get_domain_age("example.com"))
