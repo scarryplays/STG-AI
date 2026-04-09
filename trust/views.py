@@ -28,7 +28,7 @@ def get_domain_age(domain):
 
 
 
-# nbjvjcjcjgcjhgc
+
 # for i in range(10):
 #      print(get_domain_age("example.com"))
 @api_view(["POST"])
