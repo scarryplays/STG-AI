@@ -51,8 +51,7 @@ window.addEventListener("load", () => {
   setTimeout(() => {
     const loginDetected = window.STGloginDetection();
     const trackerCount = window.STGtrackerDetection();
-    const domain = window.location.hostname.replace("www.", "");
-
+    const domain = window.location.href;
     const https = checkSSL();
     const phishing = detectPhishingForm();
 
