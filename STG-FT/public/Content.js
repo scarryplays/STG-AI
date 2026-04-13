@@ -47,6 +47,8 @@ const showSTGBanner = (score, suggestion) => {
   }, 5000);
 };
 
+// clkanvksjvbskj bskljbcslkj lskjn kl.s vck.s lks klsj lks vlkj lk.jb s
+
 window.addEventListener("load", () => {
   setTimeout(() => {
     const loginDetected = window.STGloginDetection();
