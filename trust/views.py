@@ -21,7 +21,6 @@ def get_domain_age(domain):
             return 365
 
         return (datetime.now() - creation_date).days
-
     except:
         return 365
 
@@ -30,7 +29,6 @@ def get_domain_age(domain):
 def calculate_trust(request):
 
     data = request.data
-
     url = data.get("url")
 
     if not url:
@@ -42,6 +40,11 @@ def calculate_trust(request):
     if not isinstance(url, str):
         return Response({"error": "Invalid URL type"}, status=400)
 
+    url = url.strip()
+
+    if not url.startswith("http"):
+        url = "https://" + url
+
     try:
         parsed = urlparse(url)
         domain = parsed.netloc
@@ -50,9 +53,8 @@ def calculate_trust(request):
             return Response({"error": "Invalid URL"}, status=400)
 
         domain = domain.replace("www.", "")
-
     except Exception as e:
-        return Response({"error": f"URL parsing failed: {str(e)}"}, status=400)
+        return Response({"error": str(e)}, status=400)
 
     login = data.get("loginDetected") in [True, "true", "True", "1"]
     trackers = int(data.get("trackerCount") or 0)
@@ -65,9 +67,12 @@ def calculate_trust(request):
         suggestion = "Safe to use main account"
         ml_confidence = 100
         reasons.append("Known trusted domain")
-
     else:
-        ml_result, ml_confidence = predict_url(url)
+        try:
+            ml_result, ml_confidence = predict_url(url)
+        except:
+            ml_result, ml_confidence = 0, 50
+            reasons.append("ML fallback used")
 
         if ml_result == -1:
             risk_score += 50
