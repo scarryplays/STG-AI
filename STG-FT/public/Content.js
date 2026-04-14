@@ -1,25 +1,21 @@
 console.log("STG AI content script loaded");
 
-const checkSSL = () => {
-  return window.location.protocol === "https:";
-};
+let lastUrl = "";
+
+const checkSSL = () => window.location.protocol === "https:";
 
 const detectPhishingForm = () => {
   const forms = document.querySelectorAll("form");
-
   for (let form of forms) {
     const action = form.action;
     if (action && !action.includes(window.location.hostname)) {
-      console.log("STG: suspicious external login form detected");
       return true;
     }
   }
-
   return false;
 };
 
 const showSTGBanner = (score, suggestion) => {
-// asadadad
   const banner = document.createElement("div");
 
   banner.style.position = "fixed";
@@ -41,73 +37,61 @@ const showSTGBanner = (score, suggestion) => {
   banner.innerText = `🛡 STG AI: ${score} | ${suggestion}`;
 
   document.body.appendChild(banner);
-
-  setTimeout(() => {
-    banner.remove();
-  }, 5000);
+  setTimeout(() => banner.remove(), 5000);
 };
 
-// clkanvksjvbskj bskljbcslkj lskjn kl.s vck.s lks klsj lks vlkj lk.jb s
+const sendToBackend = () => {
+  const url = window.location.href;
 
-window.addEventListener("load", () => {
-  setTimeout(() => {
-    const loginDetected = window.STGloginDetection();
-    const trackerCount = window.STGtrackerDetection();
-    const domain = window.location.href;
-    const https = checkSSL();
-    const phishing = detectPhishingForm();
+  if (!url) return;
 
-    console.log("Sending to backend:", {
-      domain,
+  const loginDetected = window.STGloginDetection?.() || false;
+  const trackerCount = window.STGtrackerDetection?.() || 0;
+
+  const https = checkSSL();
+  const phishing = detectPhishingForm();
+
+  console.log("Sending:", url);
+
+  fetch("http://127.0.0.1:8000/api/trust/calculate/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      url,
       loginDetected,
       trackerCount,
       https,
       phishing
-    });
-
-    fetch("http://127.0.0.1:8000/api/trust/calculate/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        domain,
-        loginDetected,
-        trackerCount,
-        https,
-        phishing
-      })
     })
-      .then((res) => {
-        console.log("Raw response:", res);
-        console.log("Status:", res.status);
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Backend error");
+      return res.json();
+    })
+    .then((data) => {
+      console.log("Backend:", data);
 
-        if (!res.ok) {
-          throw new Error(`backend error! status: ${res.status}`);
-        }
-
-        return res.json();
-      })
-      .then((data) => {
-        console.log("Backend response:", data);
-
-        chrome.storage.local.set({
-          trustScore: data.trustScore,
-          suggestion: data.suggestion,
-          reasons: data.reasons,
-          ml_confidence: data.ml_confidence
-        });
-
-        if (
-          data.trustScore === "SAFE" ||
-          data.trustScore === "CAUTION" ||
-          data.trustScore === "RISK"
-        ) {
-          showSTGBanner(data.trustScore, data.suggestion);
-        }
-      })
-      .catch((err) => {
-        console.error("Fetch error:", err);
+      chrome.storage.local.set({
+        trustScore: data.trustScore,
+        suggestion: data.suggestion,
+        reasons: data.reasons,
+        mlConfidence: data.mlConfidence
       });
-  }, 1000);
-});
+
+      showSTGBanner(data.trustScore, data.suggestion);
+    })
+    .catch((err) => {
+      console.error("Fetch error:", err);
+    });
+};
+
+setInterval(() => {
+  const currentUrl = window.location.href;
+
+  if (currentUrl && currentUrl !== lastUrl) {
+    lastUrl = currentUrl;
+    sendToBackend();
+  }
+}, 1500);

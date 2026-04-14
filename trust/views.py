@@ -1,8 +1,10 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import DomainTrust
-import whois
+from urllib.parse import urlparse
 from datetime import datetime
+import whois
+
+from .models import DomainTrust
 from .trusted_domain import KNOWN_SITE
 from ml.predictor import predict_url
 
@@ -22,22 +24,35 @@ def get_domain_age(domain):
 
     except:
         return 365
-  
 
 
-
-
-
-# jksv ksvj 
-# for i in range(10):
-#      print(get_domain_age("example.com"))
 @api_view(["POST"])
 def calculate_trust(request):
 
     data = request.data
 
-    domain = data.get("domain")
-    domain = domain.replace("www.", "")
+    url = data.get("url")
+
+    if not url:
+        return Response({"error": "URL missing"}, status=400)
+
+    if isinstance(url, bytes):
+        url = url.decode("utf-8")
+
+    if not isinstance(url, str):
+        return Response({"error": "Invalid URL type"}, status=400)
+
+    try:
+        parsed = urlparse(url)
+        domain = parsed.netloc
+
+        if not domain:
+            return Response({"error": "Invalid URL"}, status=400)
+
+        domain = domain.replace("www.", "")
+
+    except Exception as e:
+        return Response({"error": f"URL parsing failed: {str(e)}"}, status=400)
 
     login = data.get("loginDetected") in [True, "true", "True", "1"]
     trackers = int(data.get("trackerCount") or 0)
@@ -48,19 +63,19 @@ def calculate_trust(request):
     if domain in KNOWN_SITE:
         score = "SAFE"
         suggestion = "Safe to use main account"
-        reasons.append("Known trusted domain")
         ml_confidence = 100
-        reasons.append(f"AI model confidence: {ml_confidence}%")
+        reasons.append("Known trusted domain")
 
     else:
-        ml_result, ml_confidence = predict_url(domain)
+        ml_result, ml_confidence = predict_url(url)
 
         if ml_result == -1:
             risk_score += 50
             reasons.append("AI model detected phishing pattern")
-            reasons.append(f"Model confidence: {ml_confidence}%")
+            reasons.append(f"ML confidence: {ml_confidence}%")
         else:
-            reasons.append(f"AI model confidence: {ml_confidence}%")
+            reasons.append(f"ML confidence: {ml_confidence}%")
+
         age_days = get_domain_age(domain)
 
         if age_days < 180:
@@ -77,6 +92,11 @@ def calculate_trust(request):
         elif trackers > 2:
             risk_score += 10
             reasons.append(f"{trackers} trackers detected")
+
+        path = parsed.path.lower()
+        if any(x in path for x in ["login", "signin", "verify", "account"]):
+            risk_score += 10
+            reasons.append("Sensitive path detected")
 
         if risk_score >= 60:
             score = "RISK"
@@ -101,5 +121,5 @@ def calculate_trust(request):
         "trustScore": score,
         "suggestion": suggestion,
         "reasons": reasons,
-        "ml_confidence": ml_confidence
+        "mlConfidence": ml_confidence
     })

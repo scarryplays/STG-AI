@@ -23,19 +23,17 @@ def extract_features(url):
     subdomains = domain.split(".")
     features.append(1 if len(subdomains) > 2 else -1)
 
-    features.append(-1 if parsed.scheme == "http" else 1)
+    features.append(1 if parsed.scheme == "http" else -1)
 
     features.append(1 if url.count("//") > 1 else -1)
 
     shorteners = ["bit.ly","tinyurl.com","goo.gl","ow.ly","t.co"]
     features.append(1 if any(s in url for s in shorteners) else -1)
 
-    features.append(1 if len(url) > 75 else -1)
-
     features.append(1 if len(domain) > 20 else -1)
 
     digits = sum(c.isdigit() for c in url)
-    features.append(1 if digits > 0 else -1)
+    features.append(1 if digits > 5 else -1)
 
     suspicious_words = ["login","secure","update","verify","account"]
     features.append(1 if any(word in url.lower() for word in suspicious_words) else -1)
@@ -45,6 +43,11 @@ def extract_features(url):
     features.append(1 if url.count(".") > 3 else -1)
 
     features.append(1 if len(parsed.path) > 10 else -1)
+
+    path = parsed.path.lower()
+    features.append(1 if any(x in path for x in ["login","signin","verify","account","secure"]) else -1)
+
+    features.append(1 if any(x in domain.lower() for x in ["secure","login","verify"]) else -1)
 
     while len(features) < 30:
         features.append(0)
