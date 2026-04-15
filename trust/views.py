@@ -8,7 +8,7 @@ from .models import DomainTrust
 from .trusted_domain import KNOWN_SITE
 from ml.predictor import predict_url
 
-
+# knvslk vslk
 def get_domain_age(domain):
     try:
         info = whois.whois(domain)
