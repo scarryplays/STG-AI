@@ -35,7 +35,7 @@ def calculate_trust(request):
 
     if isinstance(url, bytes):
         url = url.decode("utf-8")
-        # FUavvava
+        # FUavor bytes input, decode to string
 
     if not isinstance(url, str):
         return Response({"error": "Invalid URL type"}, status=400)
