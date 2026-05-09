@@ -61,7 +61,7 @@ def calculate_trust(request):
 
     reasons = []
     risk_score = 0
-    # bjkbvsvbkhsvbjkbkjb
+    # bjkbvsvbkh
 
     if domain in KNOWN_SITE:
         score = "SAFE"
